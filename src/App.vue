@@ -5,15 +5,19 @@
             <span v-if="wlan">{{wlan.name}}</span><br/><span id="version">v.1.0</span>
         </div>
 
-        <edit-settings v-if="edit_settings" :wlan="wlan" :datetime="datetime">
+        <edit-settings v-if="edit_settings" :wlan="wlan" :datetime="datetime" 
+            @datetime-change="datetime_change">
         </edit-settings>
 
-        <div id="top_info_block" v-show="!edit_settings">
+        <div id="top_info_block" v-show="!edit_settings" v-if="modules && modules.rtc">
             <div id="current_time">
                 <span class="date">{{date_text}}</span>&nbsp; 
                 <span class="time">{{time_text}}</span>
             </div>
         </div>
+
+        <sensors-data module="climate" v-if="!edit_settings && modules && modules.climate">
+        </sensors-data>
     </div>
 
 </template>
@@ -25,13 +29,15 @@ import './style_mobile.css'
 import {get} from './api'
 import {zeropad, MONTHS_GENITIVE} from './utils'
 import EditSettings from './components/EditSettings'
+import SensorsData from './components/SensorsData'
 
 export default {
   name: 'App',
-  components: {EditSettings},
+  components: {EditSettings, SensorsData},
   data () {
     return {
       edit_settings: false,
+      modules: null,
       wlan: null,
       datetime: null,
       date_text: null,
@@ -42,6 +48,10 @@ export default {
     get('/api/settings/wlan')
       .then(response => {
         this.wlan = response.data
+      })
+    get('/api/modules')
+      .then(response => {
+        this.modules = response.data
       })
     this.get_datetime()
     setInterval(this.get_datetime, 30000)
@@ -57,6 +67,9 @@ export default {
         .then(response => {
             this.set_datetime(response.data)
         })
+    },
+    datetime_change (datetime) {
+      this.set_datetime(datetime)
     }
   }
 }

@@ -54,10 +54,10 @@
 			</select>			
 			<br/>
 			<select v-model="edit_datetime[4]">
-				<option v-for="item in 24" :key="item" :value="item">{{item}}</option>
+				<option v-for="item in zeropad_range(24)" :key="item" :value="item">{{item}}</option>
 			</select> :
 			<select v-model="edit_datetime[5]">
-				<option v-for="item in 60" :key="item" :value="item">{{item}}</option>
+				<option v-for="item in zeropad_range(60)" :key="item" :value="item">{{item}}</option>
 			</select>
 		</div>
 
@@ -69,6 +69,9 @@
 <script>
 
 import {get, dataPost} from '../api'
+import {zeropad} from '../utils'
+
+const DATETIME_LENGTH = 6
 
 export default {
   name: 'EditSettings',
@@ -77,7 +80,7 @@ export default {
   data () {
     return {
       edit_wlan: JSON.parse(JSON.stringify(this.wlan)),
-      edit_datetime: [...this.datetime],
+      edit_datetime: this.datetime.map(item => zeropad(item)),
       wlan_scan: null
     }
   },
@@ -89,8 +92,33 @@ export default {
   },
   methods: {
     post () {
-      dataPost()
+      let datetime_modified = false
+      for (let co=0; !datetime_modified && co < DATETIME_LENGTH; co++)
+        datetime_modified = this.edit_datetime[co] != this.datetime[co]
+      if (datetime_modified)
+        dataPost('time', this.edit_datetime.map(item => parseInt(item)))
+          .then(data => {
+            this.$emit('datetime-change', data)
+          })
+
+      let wlan_modified = false
+      for (const field in this.wlan) {
+        if (this.wlan[field] != this.edit_wlan[field]) {
+          wlan_modified = true
+          break
+        }
+      }
+      if (wlan_modified) {
+        dataPost('settings/wlan', this.edit_wlan)
+          .then(() => {
+            alert('Устройство будет перезагружено')
+          })
+      }
+    },
+    zeropad_range (limit) {
+      return [...Array(limit).keys()].map(item => zeropad(item))
     }
+
   }
 }
 

@@ -1,5 +1,10 @@
 module.exports = {
   devServer: {
-    proxy: 'http://192.168.1.195'
+    proxy: {
+      '^/api': {
+        target: 'http://192.168.1.195',
+        preserveHeaderKeyCase: true
+      }
+    }
   }
 }
