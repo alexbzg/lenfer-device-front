@@ -33,18 +33,18 @@
 		<div id="time_setup">
 			<h3>Установка даты и времени</h3>
 			<select v-model="edit_datetime[2]">
-				<option v-for="item in 31" :key="item" :value="item">{{item}}</option>
+				<option v-for="item in zeropad_range(31)" :key="item" :value="item">{{item}}</option>
 			</select>			
 			<select v-model="edit_datetime[1]">
-				<option value="1">январь</option>
-				<option value="2">февраль</option>
-				<option value="3">март</option>
-				<option value="4">апрель</option>
-				<option value="5">май</option>
-				<option value="6">июнь</option>
-				<option value="7">июль</option>
-				<option value="8">август</option>
-				<option value="9">сентябрь</option>
+				<option value="01">январь</option>
+				<option value="02">февраль</option>
+				<option value="03">март</option>
+				<option value="04">апрель</option>
+				<option value="05">май</option>
+				<option value="06">июнь</option>
+				<option value="07">июль</option>
+				<option value="08">август</option>
+				<option value="09">сентябрь</option>
 				<option value="10">октябрь</option>
 				<option value="11">ноябрь</option>
 				<option value="12">декабрь</option>
