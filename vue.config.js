@@ -6,5 +6,6 @@ module.exports = {
         preserveHeaderKeyCase: true
       }
     }
-  }
+  },
+  assetsDir: 'static'
 }

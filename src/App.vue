@@ -2,7 +2,7 @@
     <div id="app">
         <div id="title">
             <img id="setup_link" src="/static/images/icon_setup.png" @click="edit_settings = !edit_settings">
-            <span v-if="wlan">{{wlan.name}}</span><br/><span id="version">v.1.0</span>
+            <template v-if="wlan">{{wlan.name}}</template><br/><span id="version">v.1.0</span>
         </div>
 
         <edit-settings v-if="edit_settings" :wlan="wlan" :datetime="datetime" 

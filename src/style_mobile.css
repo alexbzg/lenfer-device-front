@@ -56,7 +56,7 @@ button.delete{
 	padding: 10px 0 0 0;
 	position: relative;
 }
-#title span#version{
+#title span{
 	font-size: 12px;
 	color: #ccc;
 	font-weight: normal;
@@ -136,34 +136,35 @@ button.delete{
 }
 
 table#climat_data{
-	margin: 30px auto 0 auto;
+	margin: 30px auto;
 	border-collapse: collapse;
 	background-color: #fff;
+	border-radius: 10px;
 }
 table#climat_data td{
 	padding: 10px 0px 10px 10px;
 	vertical-align: bottom;
-	text-align: center;
+	vertical-align: middle;
 	font-size: 12px;
 }
 table#climat_data td.icon{
 	line-height: 10px;
 	color: #999;
-	padding-top: 15px;
+	padding: 15px 0px 10px 30px;
+	vertical-align: bottom;
 }
-table#climat_data td.data{
+table#climat_data td.current_data{
 	font-weight: bold;
 	font-size: 48px;
-	vertical-align: middle;
 	padding: 10px 30px;
 	color: #005295;
 }
-table#climat_data td.interval{
+table#climat_data td.set_data{
 	font-weight: bold;
-	font-size: 18px;
-	vertical-align: middle;
+	font-size: 20px;
 	color: #999;
-	padding: 10px 0px;
+	padding: 10px 30px 10px 0px;
+	cursor: pointer;
 }
 
 
@@ -300,7 +301,12 @@ table#climat_data td.interval{
 	color: #fff;
 	padding: 5px;
 }
-
+.set_data_form input#set_value, .set_data_form input#set_delta{
+	font-size: 36px;
+}
+.set_data_form input#set_delta{
+	width: 50%;
+}
 
 
 
