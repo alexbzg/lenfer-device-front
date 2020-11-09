@@ -9,27 +9,14 @@
 		<br/>
 		<br/>
 		<h3>Подключение к WiFi сети</h3>
-		<select type="text" name="" v-model="edit_wlan.ssid">
-            <template v-if="wlan_scan">
-                <option v-for="(item, idx) in wlan_scan" :key="idx" 
-                    :value="item">{{item}}</option>
-            </template>
-			<option value="-">Не соединяться</option>
-		</select>
+		<input type="text" name="" v-model="edit_wlan.ssid"/>
 		<br/>
-		название WiFi сети<br/>
+		название WiFi сети (для отмены подключения введите "-")<br/>
 		<input type="text" name="" v-model="edit_wlan.key"><br/>
 		пароль<br/>
 		<br/>
 		<br/>
 		<br/>
-		<!--
-		<h3>Подключение к ClimatController.ru</h3>
-		<input type="text" name="" value=""><br/>
-		логин<br/>
-		<input type="text" name="" value=""><br/>
-		пароль
-		-->
 		<div id="time_setup">
 			<h3>Установка даты и времени</h3>
 			<select v-model="edit_datetime[2]">
@@ -68,7 +55,7 @@
 
 <script>
 
-import {get, dataPost} from '../api'
+import {dataPost} from '../api'
 import {zeropad} from '../utils'
 
 const DATETIME_LENGTH = 6
@@ -76,20 +63,19 @@ const DATETIME_LENGTH = 6
 export default {
   name: 'EditSettings',
   props: ['wlan', 'datetime'],
-  components: {},
   data () {
     return {
       edit_wlan: JSON.parse(JSON.stringify(this.wlan)),
-      edit_datetime: this.datetime.map(item => zeropad(item)),
-      wlan_scan: null
+      edit_datetime: this.datetime.map(item => zeropad(item))
+      //wlan_scan: null
     }
   },
-  async mounted () {
+  /*async mounted () {
     get('/api/settings/wlan/scan')
      .then(response => {
        this.wlan_scan = response.data
      })
-  },
+  },*/
   methods: {
     post () {
       let datetime_modified = false
