@@ -8,10 +8,10 @@
 		<br/>
 		<br/>
 		<br/>
-		<h3>Подключение к WiFi сети</h3>
+		<h3><input type="checkbox" v-model="edit_wlan.enable_ssid"/> Подключение к WiFi сети</h3>
 		<input type="text" name="" v-model="edit_wlan.ssid"/>
 		<br/>
-		название WiFi сети (для отмены подключения введите "-")<br/>
+		название WiFi сети<br/>
 		<input type="text" name="" v-model="edit_wlan.key"><br/>
 		пароль<br/>
 		<br/>
