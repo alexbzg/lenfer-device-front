@@ -20,7 +20,7 @@
 		<div id="time_setup">
 			<h3>Установка даты и времени</h3>
 			<select v-model="edit_datetime[2]">
-				<option v-for="item in zeropad_range(31)" :key="item" :value="item">{{item}}</option>
+				<option v-for="item in zeropad_range(31, 1)" :key="item" :value="item">{{item}}</option>
 			</select>			
 			<select v-model="edit_datetime[1]">
 				<option value="01">январь</option>
@@ -56,7 +56,7 @@
 <script>
 
 import {dataPost} from '../api'
-import {zeropad} from '../utils'
+import {zeropad_range, zeropad} from '../utils'
 
 const DATETIME_LENGTH = 6
 
@@ -101,10 +101,7 @@ export default {
           })
       }
     },
-    zeropad_range (limit) {
-      return [...Array(limit).keys()].map(item => zeropad(item))
-    }
-
+    zeropad_range: zeropad_range
   }
 }
 

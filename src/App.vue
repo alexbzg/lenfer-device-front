@@ -18,6 +18,9 @@
 
         <sensors-data module="climate" v-if="!edit_settings && modules && modules.climate">
         </sensors-data>
+
+        <relay relay_module="feeder"></relay>
+
     </div>
 
 </template>
@@ -30,10 +33,11 @@ import {get} from './api'
 import {zeropad, MONTHS_GENITIVE} from './utils'
 import EditSettings from './components/EditSettings'
 import SensorsData from './components/SensorsData'
+import Relay from './components/Relay'
 
 export default {
   name: 'App',
-  components: {EditSettings, SensorsData},
+  components: {EditSettings, SensorsData, Relay},
   data () {
     return {
       edit_settings: false,
