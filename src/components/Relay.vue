@@ -5,8 +5,8 @@
                 <tr>
                     <td class="time_note">СТАРТ</td>
                     <td class="time_on">
-                        <span x-text="timer.conf.on.hr" class="digits"></span>:
-                        <span x-text="timer.conf.on.mn" class="digits"></span>
+                        <span class="digits">{{timer.conf.on.hr}}</span>:
+                        <span class="digits">{{timer.conf.on.mn}}</span>
                     </td>
                 </tr>
                 <tr>
@@ -70,14 +70,22 @@
                         <td class="bottom_text">мин</td>
                         <td class="bottom_text">сек</td>
                     </tr>
-                </table>            
+                </table>    
+				<button class="delete" id="delete_period" v-if="timer_edit.idx !== -1" 
+                    @click="timer_delete()">
+                    Удалить этот период
+                </button><br/>
+                <button class="cancel" id="close_period" @click="timer_edit_cancel()">Отмена</button>
+                <button class="confirm" id="ok_period" @click="timer_save()">OK</button>        
             </div>
         </div>
 
         <button id="manual_button" @mousedown="switch_relay(true)" @mouseup="switch_relay(false)"
 			@touchstart="switch_relay(true)" @touchend="switch_relay(false)" @touchcancel="switch_relay(false)">
 			РУЧНОЙ ПУСК
-		</button>
+		</button><br/>
+        <input type="checkbox" v-if="relay_module === 'feeder'" v-model="reverse" 
+            @click="reverse = !reverse"/>Реверс
     </div>
 </template>
 <script>
@@ -89,6 +97,7 @@ export default {
     props: ['relay_module'],
     data () {
         return {
+            reverse: false,
             timers: null,
             timer_edit: null
         }
@@ -96,15 +105,20 @@ export default {
     async mounted () {
         get(`/api/${this.relay_module}/timers`)
             .then(response => {
-                this.timers = response.data
-                for (const timer of this.timers) {
-                    timer.duration_display = this.secs_to_tuple(timer.conf.duration)
-                }
+                this.update(response.data)
             })
     },
     methods: {
+        update (data) {
+            this.timer_edit = null
+            this.timers = data
+            for (const timer of this.timers) {
+                timer.duration_display = this.secs_to_tuple(timer.conf.duration)
+                timer.limits = this.timer_limits(timer)
+            }
+        },
         async switch_relay (val) {
-            dataPost(`${this.relay_module}/relay`, {relay: 0, value: val})
+            dataPost(`${this.relay_module}/relay`, {relay: 0, value: val, reverse: this.reverse})
         },
         zeropad_range: zeropad_range,
         zeropad: zeropad,
@@ -146,7 +160,46 @@ export default {
             return r
         },
         tuple_to_secs (tuple) {
-            return Number(tuple.mn)*60 + Number(tuple.sc)
+            return (tuple.hr ? Number(tuple.hr) : 0)*3600 +
+                (tuple.mn ? Number(tuple.mn) : 0)*60 +
+                (tuple.sc ? Number(tuple.sc) : 0)
+        },
+        timer_limits (timer) {
+            const start = this.tuple_to_secs(timer.conf.on)
+            return [start, start + timer.conf.duration]
+        },
+        timer_edit_cancel() {
+            if (confirm("Отменить все внесенные изменения?"))
+                this.timer_edit = null
+        },
+        timer_delete () {            
+            if (confirm("Вы действительно хотите удалить этот период?"))
+                dataPost(`${this.relay_module}/timers`, this.timer_edit.idx, 'DELETE')
+                    .then(data => { this.update(data) })
+        },
+        timer_save () {
+            this.timer_edit.conf.duration = this.tuple_to_secs(this.timer_edit.duration_edit)
+            if (!this.timer_edit.conf.duration) {
+                alert("Нужно установить значение ВКЛЮЧИТЬ на!")
+                return
+            }
+            const limits = this.timer_limits(this.timer_edit)            
+            for (const timer of this.timers) {
+                if ((timer.limits[0] <= limits[0] && limits[0] <= timer.limits[1]) || 
+                    (timer.limits[0] <= limits[1] && limits[1] <= timer.limits[1])) {
+                    alert(`Период конфликтует с периодом ${zeropad(timer.conf.on.hr)}:${zeropad(timer.conf.on.mn)}!`)
+                    return
+                }
+            }
+            const data = {}
+            data[this.timer_edit.idx] = {
+                timer_type: this.timer_edit.timer_type,
+                conf: this.timer_edit.conf
+            }
+            dataPost(`${this.relay_module}/timers`, data)
+                .then(upd_data => {
+                    this.update(upd_data)
+                })
         }
     }    
 }
