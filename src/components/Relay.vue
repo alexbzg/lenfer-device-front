@@ -1,23 +1,23 @@
 <template>
     <div class="relay">
-        <div class="view_period interval" v-for="(timer, idx) in timers" :key="idx" @click="open_timer(idx)">
+        <div class="view_period interval" v-for="(timer, idx) in timers_display" :key="idx" @click="open_timer(idx)">
             <table>
                 <tr>
                     <td class="time_note">СТАРТ</td>
                     <td class="time_on">
-                        <span class="digits">{{timer.on_display.hr}}</span>:
-                        <span class="digits">{{timer.on_display.mn}}</span>
+                        <span class="digits">{{timer.on.hr}}</span>:
+                        <span class="digits">{{timer.on.mn}}</span>
                     </td>
                 </tr>
                 <tr>
                     <td class="time_note">ВКЛ на</td>
                     <td class="time_off">
-                        <template v-if="timer.duration_display.mn">
-                            <span class="digits">{{timer.duration_display.mn}}</span>
+                        <template v-if="timer.duration.mn !== '00'">
+                            <span class="digits">{{timer.duration.mn}}</span>
                             <span class="unit">мин</span> 
                         </template>
-                        <template v-if="timer.duration_display.sc">
-                            <span class="digits">{{timer.duration_display.sc}}</span>
+                        <template v-if="timer.duration.sc !== '00'">
+                            <span class="digits">{{timer.duration.sc}}</span>
                             <span class="unit">сек</span> 
                         </template>
                     </td>
@@ -103,7 +103,7 @@ export default {
         return {
             reverse: false,
             relay_elapsed: 0,
-            timers: null,
+            timers: [],
             timer_edit: null
         }
     },
@@ -117,11 +117,6 @@ export default {
         update (data) {
             this.timer_edit = null
             this.timers = data
-            for (const timer of this.timers) {
-                timer.display = this.secs_to_tuple(timer.on)
-                timer.duration_display = this.secs_to_tuple(timer.duration)
-                timer.limits = this.timer_limits(timer)
-            }
         },
         async switch_relay (val) {
             if (this.relay_cancel)
@@ -162,7 +157,7 @@ export default {
             }
         },
         secs_to_tuple (secs) {
-            const r = {hr:0, mn: 0, sc: 0}
+            const r = {hr:"00", mn: "00", sc: "00"}
             if (secs) {
                 r.hr = zeropad(Math.floor(secs/3600))
                 r.mn = zeropad(Math.floor((secs - r.hr*3600)/60))
@@ -176,8 +171,7 @@ export default {
                 (tuple.sc ? Number(tuple.sc) : 0)
         },
         timer_limits (timer) {
-            const start = this.tuple_to_secs(timer.on)
-            return [start, start + timer.duration]
+            return [timer.on, timer.on + timer.duration]
         },
         timer_edit_cancel() {
             if (confirm("Отменить все внесенные изменения?"))
@@ -204,7 +198,7 @@ export default {
                     const co_limits = this.timer_limits(this.timers[co])
                     if ((co_limits[0] <= limits[0] && limits[0] <= co_limits[1]) || 
                         (co_limits[0] <= limits[1] && limits[1] <= co_limits[1])) {
-                        alert(`Период конфликтует с периодом ${this.timers_display[co].hr}:${this.timers_display[co].mn}!`)
+                        alert(`Период конфликтует с периодом ${this.timers_display[co].on.hr}:${this.timers_display[co].on.mn}!`)
                         return
                     }
                 }
