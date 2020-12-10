@@ -19,7 +19,7 @@
         <sensors-data module="climate" v-if="!edit_settings && modules && modules.climate">
         </sensors-data>
 
-        <relay relay_module="feeder"></relay>
+        <relay relay_module="feeder" v-if="!edit_settings && modules && modules.feeder"></relay>
 
     </div>
 
