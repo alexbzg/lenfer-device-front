@@ -35,12 +35,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <select v-model="timer_edit.on_edit.hr">
+                            <select v-model="timer_edit.timer.on.hr">
                                 <option v-for="item in zeropad_range(24)" :key="item" :value="item">{{item}}</option>
                             </select><span>:</span>
                         </td>
                         <td>
-                            <select v-model="timer_edit.on_edit.mn">
+                            <select v-model="timer_edit.timer.on.mn">
                                 <option v-for="item in zeropad_range(60)" :key="item" :value="item">{{item}}</option>
                             </select>
                         </td>
@@ -56,12 +56,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <select v-model="timer_edit.duration_edit.mn">
+                            <select v-model="timer_edit.timer.duration.mn">
                                 <option v-for="item in zeropad_range(60)" :key="item" :value="item">{{item}}</option>
                             </select><span>:</span>
                         </td>
                         <td>
-                            <select v-model="timer_edit.duration_edit.sc">
+                            <select v-model="timer_edit.timer.duration.sc">
                                 <option v-for="item in zeropad_range(60)" :key="item" :value="item">{{item}}</option>
                             </select>
                         </td>
@@ -176,8 +176,8 @@ export default {
                 (tuple.sc ? Number(tuple.sc) : 0)
         },
         timer_limits (timer) {
-            const start = this.tuple_to_secs(timer.conf.on)
-            return [start, start + timer.conf.duration]
+            const start = this.tuple_to_secs(timer.on)
+            return [start, start + timer.duration]
         },
         timer_edit_cancel() {
             if (confirm("Отменить все внесенные изменения?"))
@@ -189,24 +189,28 @@ export default {
                     .then(data => { this.update(data) })
         },
         timer_save () {
-            this.timer_edit.conf.duration = this.tuple_to_secs(this.timer_edit.duration_edit)
-            if (!this.timer_edit.conf.duration) {
+            const timer = {}
+            for (const prop in this.timer_edit.timer) {
+                timer[prop] = this.tuple_to_secs(this.timer_edit.timer[prop])
+            }
+            if (!timer.duration) {
                 alert("Нужно установить значение ВКЛЮЧИТЬ на!")
                 return
             }
-            const limits = this.timer_limits(this.timer_edit)            
-            for (const timer of this.timers) {
-                if ((timer.limits[0] <= limits[0] && limits[0] <= timer.limits[1]) || 
-                    (timer.limits[0] <= limits[1] && limits[1] <= timer.limits[1])) {
-                    alert(`Период конфликтует с периодом ${zeropad(timer.on.hr)}:${zeropad(timer.on.mn)}!`)
-                    return
+            const limits = this.timer_limits(timer)
+            const timers_length = this.timers.length
+            for (let co = 0; co < timers_length; co++) {
+                if (co != this.timer_edit.idx) {
+                    const co_limits = this.timer_limits(this.timers[co])
+                    if ((co_limits[0] <= limits[0] && limits[0] <= co_limits[1]) || 
+                        (co_limits[0] <= limits[1] && limits[1] <= co_limits[1])) {
+                        alert(`Период конфликтует с периодом ${this.timers_display[co].hr}:${this.timers_display[co].mn}!`)
+                        return
+                    }
                 }
             }
             const data = {}
-            data[this.timer_edit.idx] = {}
-            for (const prop in this.timer_edit.timer) {
-                data[this.timer_edit.idx][prop] = this.tuple_to_secs(this.timer_edit.timer[prop])
-            }
+            data[this.timer_edit.idx] = timer
             dataPost(`${this.relay_module}/timers`, data)
                 .then(upd_data => {
                     this.update(upd_data)
