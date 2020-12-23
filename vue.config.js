@@ -2,7 +2,7 @@ module.exports = {
   devServer: {
     proxy: {
       '^/api': {
-        target: 'http://192.168.1.177',
+        target: 'http://192.168.1.165',
         preserveHeaderKeyCase: true
       }
     }

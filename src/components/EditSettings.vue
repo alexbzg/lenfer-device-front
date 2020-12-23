@@ -19,10 +19,10 @@
 		<br/>
 		<div id="time_setup">
 			<h3>Установка даты и времени</h3>
-			<select v-model="edit_datetime[2]">
+			<select v-model="edit_datetime[2]" @change="edit_datetime_changed = true">
 				<option v-for="item in zeropad_range(31, 1)" :key="item" :value="item">{{item}}</option>
 			</select>			
-			<select v-model="edit_datetime[1]">
+			<select v-model="edit_datetime[1]" @change="edit_datetime_changed = true">
 				<option value="01">январь</option>
 				<option value="02">февраль</option>
 				<option value="03">март</option>
@@ -36,14 +36,14 @@
 				<option value="11">ноябрь</option>
 				<option value="12">декабрь</option>
 			</select>
-			<select v-model="edit_datetime[0]">
+			<select v-model="edit_datetime[0]" @change="edit_datetime_changed = true">
 				<option v-for="item in 20" :key="item" :value="item + 2019">{{item + 2019}}</option>
 			</select>			
 			<br/>
-			<select v-model="edit_datetime[4]">
+			<select v-model="edit_datetime[4]" @change="edit_datetime_changed = true">
 				<option v-for="item in zeropad_range(24)" :key="item" :value="item">{{item}}</option>
 			</select> :
-			<select v-model="edit_datetime[5]">
+			<select v-model="edit_datetime[5]" @change="edit_datetime_changed = true">
 				<option v-for="item in zeropad_range(60)" :key="item" :value="item">{{item}}</option>
 			</select>
 		</div>
@@ -66,16 +66,10 @@ export default {
   data () {
     return {
       edit_wlan: JSON.parse(JSON.stringify(this.wlan)),
-      edit_datetime: this.datetime.map(item => zeropad(item))
-      //wlan_scan: null
+      edit_datetime: this.datetime.map(item => zeropad(item)),
+      edit_datetime_changed: false
     }
   },
-  /*async mounted () {
-    get('/api/settings/wlan/scan')
-     .then(response => {
-       this.wlan_scan = response.data
-     })
-  },*/
   methods: {
     post () {
       let datetime_modified = false
@@ -102,6 +96,13 @@ export default {
       }
     },
     zeropad_range: zeropad_range
+  },
+  watch: {
+	datetime () {
+      if (!this.edit_datetime_changed) {
+		this.edit_datetime = this.datetime.map(item => zeropad(item))
+      }
+	}  
   }
 }
 
