@@ -1,27 +1,16 @@
 <template>
     <div id="app">
-        <div id="title">
-            <img id="setup_link" src="/static/images/icon_setup.png" @click="edit_settings = !edit_settings">
-            <template v-if="wlan">{{wlan.name}}</template><br/><span id="version">v.1.0</span>
-        </div>
+        <img id="logo" src="/static/images/logo_mobile.png">
 
-        <edit-settings v-if="edit_settings" :wlan="wlan" :datetime="datetime" 
+        <div id="alert" v-if="connected === false">
+          <b>Внимание!</b><br/>Нет связи с устройством.<br/>Проверьте соединение или переподключитесь к устройству.
+        </div>
+        <edit-settings v-if="wlan && datetime && modules"
+            :wlan="wlan" :datetime="datetime" :device_hash="device_hash" :modules="modules"
             @datetime-change="datetime_change">
         </edit-settings>
 
-        <div id="top_info_block" v-show="!edit_settings" v-if="modules && modules.rtc">
-            <div id="current_time">
-                <span class="date">{{date_text}}</span>&nbsp; 
-                <span class="time">{{time_text}}</span>
-            </div>
-        </div>
-
-        <sensors-data module="climate" v-if="!edit_settings && modules && modules.climate">
-        </sensors-data>
-
-        <relay relay_module="feeder" v-if="!edit_settings && modules && modules.feeder"></relay>
-
-    </div>
+   </div>
 
 </template>
 
@@ -30,22 +19,18 @@
 import './style_mobile.css'
 
 import {get} from './api'
-import {zeropad, MONTHS_GENITIVE} from './utils'
 import EditSettings from './components/EditSettings'
-import SensorsData from './components/SensorsData'
-import Relay from './components/Relay'
 
 export default {
   name: 'App',
-  components: {EditSettings, SensorsData, Relay},
+  components: {EditSettings},
   data () {
     return {
-      edit_settings: false,
-      modules: null,
+      connected: null,
+      device_hash: null,
       wlan: null,
+      modules: {},
       datetime: null,
-      date_text: null,
-      time_text: null
     }
   },
   async mounted () {
@@ -57,20 +42,26 @@ export default {
       .then(response => {
         this.modules = response.data
       })
+    get('/api/device_hash')
+      .then(response => {
+        this.device_hash = response.data
+      })
     this.get_datetime()
     setInterval(this.get_datetime, 30000)
   },
   methods: {
     set_datetime (datetime) {
       this.datetime = datetime;
-      this.date_text = `${this.datetime[2]} ${MONTHS_GENITIVE[this.datetime[1]]} ${this.datetime[0]}`;
-      this.time_text = `${zeropad(this.datetime[4])}:${zeropad(this.datetime[5])}`;
     },
     async get_datetime () {
      get('/api/time')
         .then(response => {
             this.set_datetime(response.data)
-        })
+            this.connected = true
+          })
+          .catch(() => {
+            this.connected = false
+          })
     },
     datetime_change (datetime) {
       this.set_datetime(datetime)
