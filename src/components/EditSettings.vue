@@ -41,10 +41,10 @@
 				<option v-for="item in 20" :key="item" :value="item + 2019">{{item + 2019}}</option>
 			</select>			
 			<br/>
-			<select v-model="edit_datetime[4]" @change="edit_datetime_changed = true">
+			<select v-model="edit_datetime[3]" @change="edit_datetime_changed = true">
 				<option v-for="item in zeropad_range(24)" :key="item" :value="item">{{item}}</option>
 			</select> :
-			<select v-model="edit_datetime[5]" @change="edit_datetime_changed = true">
+			<select v-model="edit_datetime[4]" @change="edit_datetime_changed = true">
 				<option v-for="item in zeropad_range(60)" :key="item" :value="item">{{item}}</option>
 			</select>
 		</div>
@@ -59,7 +59,7 @@
 import {dataPost} from '../api'
 import {zeropad_range, zeropad} from '../utils'
 
-const DATETIME_LENGTH = 6
+const DATETIME_LENGTH = 5
 
 export default {
   name: 'EditSettings',
